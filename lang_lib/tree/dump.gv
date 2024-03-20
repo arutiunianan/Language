@@ -1,0 +1,14 @@
+digraph structs {
+    node [color=black, shape=box, style="filled"];
+    node0 [fillcolor="#63e69e", label="+"];
+    edge [color="#3cf71b"]; node0 -> node1;
+    node1 [fillcolor="#63e69e", label="SIN"];
+    edge [color="#3cf71b"]; node1 -> node3;
+    node3 [fillcolor="#5ebfff", label="x"];
+    edge [color="#ff0000"]; node0 -> node2;
+    node2 [fillcolor="#63e69e", label="^"];
+    edge [color="#3cf71b"]; node2 -> node5;
+    node5 [fillcolor="#5ebfff", label="x"];
+    edge [color="#ff0000"]; node2 -> node6;
+    node6 [fillcolor="#5ebfff", label="2"];
+}
