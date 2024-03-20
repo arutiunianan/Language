@@ -1,289 +1,294 @@
 #include "tree.h"
 
-const char* leafcolor = "#5ebfff";
-const char* nodecolor = "#63e69e";
-const char* leftcolor = "#3cf71b";
-const char* rightcolor = "#ff0000";
+const char* num_color   = "#5ebfff";
+const char* oper_color  = "#63e69e";
+const char* var_color   = "#3cf71b";
+const char* links_color = "#ff0000";
+const char* font_color  = "#0e0a2a";
 
-#define CASE(OP)                                             \
-    case OP:                                                  \
-        fprintf(dump_file, "%s", #OP);                         \
-        break;
+#define CHECK_ERROR(obj, condition, error)                          \
+do                                                                   \
+{                                                                     \
+    if(condition)                                                      \
+        (obj)->errors |= error;                                         \
+    else                                                                 \
+        (obj)->errors &= ~(error);                                        \
+} while(0)
 
-void TreeCtor(Tree* tree )
+#define ERROR_PROCESSING(structure, StructVerifier, StructDump, StructDtor)  \
+do                                                                            \
+{                                                                              \
+    if(StructVerifier(structure))                                              \
+    {                                                                            \
+        StructDump(structure, stderr);                                            \
+        StructDtor(structure);                                                     \
+        return (structure)->errors;                                                 \
+    }                                                                                \
+} while(0)
+
+
+TreeNode* OpNew(TreeNode_t* data)
 {
-    assert( tree );
+    assert(data != NULL);
 
-    tree->log = fopen( "tree/treelog.txt","wb" );
-    tree->root = NULL;
-    tree->size = 0;
+    TreeNode* node = (TreeNode*)calloc(1, sizeof(TreeNode));
+    if(node) 
+    {
+        node->node_elem = *data;
+    }
+
+    return node;
 }
 
-void TreeDtor( Tree* tree)
+void OpDelete(TreeNode* node)
 {
-    if( tree == NULL )
+    assert(node != NULL);
+
+    node->node_elem = {};
+    free(node->left);
+    free(node->right);
+}
+
+void PrintNodeInOrder(Tree* tree, const TreeNode* node, FILE* logger)
+{
+    assert(tree   != NULL);
+    assert(logger != NULL);
+
+    if(!node) 
+    { 
+        fprintf(logger, " " EMPTY_NODE); 
+        return; 
+    }
+    
+    fprintf(logger, "( ");
+    
+    PrintNodeInOrder(tree, node->left,  logger);
+    fprintf(logger, "%s ", tree->ElemPrinter(&node->node_elem));
+    PrintNodeInOrder(tree, node->right, logger);
+
+    fprintf(logger, ") ");
+}
+
+void PrintNodePostOrder(Tree* tree, const TreeNode* node, FILE* logger)
+{
+    assert(tree   != NULL);
+    assert(logger != NULL);
+
+    if(!node) 
+    { fprintf(logger, " " EMPTY_NODE); return; }
+    
+    fprintf(logger, "( ");
+    
+    PrintNodePostOrder(tree, node->left,  logger);
+    PrintNodePostOrder(tree, node->right, logger);
+    fprintf(logger, "%s ", tree->ElemPrinter(&node->node_elem));
+
+    fprintf(logger, ") ");
+}
+
+void PrintNodePreOrder(Tree* tree, const TreeNode* node, FILE* logger)
+{
+    assert(tree   != NULL);
+    assert(logger != NULL);
+
+    if(!node) 
+    { 
+        fprintf(logger, " " EMPTY_NODE); 
+        return; 
+    }
+    
+    fprintf(logger, "( ");
+    
+    fprintf(logger, "%s ", tree->ElemPrinter(&node->node_elem));
+    PrintNodePreOrder(tree, node->left,  logger);
+    PrintNodePreOrder(tree, node->right, logger);
+
+    fprintf(logger, ") ");
+}
+
+TreeNode* CopyNode(Tree* tree, TreeNode* node)
+{
+    assert(tree != NULL);
+
+    if(!node)
+    {
+        return NULL;
+    }
+
+    TreeNode* new_node = {};
+    new_node = OpNew(&node->node_elem);
+    
+    new_node->left  = CopyNode(tree, node->left);
+    new_node->right = CopyNode(tree, node->right);
+
+    return new_node;
+}
+
+void DestroyNode(Tree* tree, TreeNode* node)
+{
+    assert(tree != NULL);
+
+    if(!node)
+    {
+        return;
+    }
+
+    if(node->left)
+    {
+        DestroyNode(tree, node->left);
+    }
+    if(node->right)
+    {
+        DestroyNode(tree, node->right);
+    }
+
+    OpDelete(node);
+}
+
+TreeNode* CreateNode(Tree* tree, TreeNode_t* data, TreeNode** node, TreeNode* left_node, TreeNode* right_node)
+{
+    assert(tree != NULL);
+    assert(node != NULL);
+
+    DestroyNode(tree, *node);
+
+    *node = OpNew(data);
+
+    (*node)->left  = left_node;
+    (*node)->right = right_node;
+
+    return *node;
+}
+
+void PrintGraphNode (Tree* tree, TreeNode* node, FILE* graph)
+{
+    assert(tree  != NULL);
+    assert(graph != NULL);
+
+    if(!node)
         return;
 
-    NodeDtor(tree->root);
+    if(node->node_elem.type == ID)
+    {
+        fprintf(graph, 
+                "node [shape=\"box\", style=\"filled\", fillcolor=\"%s\", fontcolor=\"%s\", margin=\"0.01\"];\n", 
+                var_color, font_color);
+    }
+    else if(node->node_elem.type == OPER)
+    {
+        fprintf(graph, 
+                "node [shape=\"box\", style=\"filled\", fillcolor=\"%s\", fontcolor=\"%s\", margin=\"0.01\"];\n", 
+                oper_color, font_color);
+    }
+    else if(node->node_elem.type == NUM)
+    {
+        fprintf(graph, 
+                "node [shape=\"box\", style=\"filled\", fillcolor=\"%s\", fontcolor=\"%s\", margin=\"0.01\"];\n", 
+                num_color, font_color);
+    }
 
-    tree->root = NULL;
-    tree->size = DEAD_SIZE;
-    fclose( tree->log );
-}
-
-int NodeDtor( Node* node)
-{
-    if( node == NULL )
-        return 1;
+    fprintf(graph,
+            "\"node%p\" [shape=\"record\", label=\"\\n %s\"];\n", 
+            node, tree->ElemPrinter(&node->node_elem));
     
-    if( node->left  != NULL ) 
-        NodeDtor( node->left );
-    if( node->right != NULL ) 
-        NodeDtor( node->right );
-
-    node->left  = NULL;
-    node->right = NULL;
-    node->value = NULL;
-    free(node);
+    PrintGraphNode(tree, node->left,  graph);
+    PrintGraphNode(tree, node->right, graph);
 }
 
-Node* CopyNode( Node* data )
+void PrintGraphLinks (Tree* tree, TreeNode* node, FILE* graph)
 {
-	if( !data )
-		return NULL;
-
-    Node* node = ( Node* )calloc( 1, sizeof( Node ) );
-
-    node->value = ( value* )calloc( 1, sizeof( value ) );
-	node->value->arg = data->value->arg;
-    node->value->type = data->value->type;
-    node->parent = NULL;
-	if(data->left)
+    assert(tree != NULL);
+    assert(graph != NULL);
+    
+    if(!node)
     {
-	    node->left  = CopyNode( data->left);
-        node->left->parent = node;
+        return;
     }
-    if(data->right)
+
+    if(node->left != NULL)
     {
-	    node->right = CopyNode( data->right);
-        node->right->parent = node;
+        fprintf(graph, 
+                "\"node%p\" -> \"node%p\"  [color=\"%s\" fontcolor=\"%s\"];\n",
+                node, node->left, links_color, links_color);
+        PrintGraphLinks(tree, node->left, graph);
     }
     
-	return node;
+    if(node->right != NULL)
+    {
+        fprintf(graph, 
+                "\"node%p\" -> \"node%p\"  [color=\"%s\" fontcolor=\"%s\"];\n",
+                node, node->right, links_color, links_color);
+        PrintGraphLinks(tree, node->right, graph);    
+    }
 }
 
-int InviteNode( Tree* tree, Node* node, WhichChild child, value_t value )
+void TreeGraphPrint(Tree* tree, const char* file_name)
 {
-    assert( tree );
+    assert(tree      != NULL);
+    assert(file_name != NULL);
 
-    if( node == NULL && node != tree->root )
-        return NODE_PTR_IS_NULL;
+    const size_t MAX_FILE_NAME_SIZE       = 50;
+    const size_t MAX_CONSOLE_COMMAND_SIZE = 100;
+    static size_t graph_num               = 1;
 
-    Node* new_node = ( Node* )calloc( 1, sizeof( Node ) );
-    if( new_node == NULL )
-        return NODE_PTR_IS_NULL;
+    char graph_file_name[MAX_FILE_NAME_SIZE] = "";
 
-    new_node->value = value;
+    sprintf(graph_file_name, "%s.gv", file_name);
+    FILE* graph = fopen(graph_file_name, "w");
 
-    if( node == tree->root && tree->size == 0 )
+    fprintf(graph, "digraph TreeGraph {\n");
+
+    PrintGraphNode(tree, tree->root, graph);
+    PrintGraphLinks(tree, tree->root, graph);
+
+    fprintf(graph, "}");
+
+    char console_command[MAX_CONSOLE_COMMAND_SIZE] = "";
+    
+    fclose(graph);
+
+    sprintf(console_command, 
+            "iconv -f CP1251 -t UTF-8 %s | dot -T png -o %s%zu.png", 
+            graph_file_name, file_name, graph_num);
+    system(console_command);
+
+    sprintf(console_command, "start %s%zu.png", file_name, graph_num);
+    system(console_command);
+
+    graph_num++;
+}
+
+unsigned TreeVerifier(Tree* tree)
+{
+    if(!tree)
     {
-        tree->root = new_node;
-        tree->size++;
-        return TREE_IS_OK;
+        return TREE_PTR_NULL;
     }
 
-    if( child == Left && node->left == NULL )
-        node->left = new_node;
-    else if( child == Right && node->right == NULL )
-        node->right = new_node;
+    CHECK_ERROR(tree, !tree->root, ROOT_PTR_NULL);
+
+    return 0;
+}
+
+void TreeCtor(Tree* tree, char* (*ElemPrinter) (const TreeNode_t*))
+{
+    assert(tree        != NULL);
+    assert(ElemPrinter != NULL);
+
+    tree->ElemPrinter = ElemPrinter;
+}
+
+int TreeDtor(Tree* tree)
+{
+    assert(tree != NULL);
+
+    if(!(tree->errors & TREE_DELETED))
+    {
+        DestroyNode(tree, tree->root);
+        tree->errors |= TREE_DELETED;
+    }
     else
-        return ADD_NODE_ERROR; 
+        return TREE_DELETED;
 
-    tree->size++;
-    return TREE_IS_OK;
-}
-
-int RemoveNode( Tree* tree, Node* node )
-{
-    assert( tree );
-
-    if( node == NULL )
-        return 1;
-
-    if( node->left == NULL && node->right == NULL )
-    {
-        if( node == tree->root ) 
-            return TRY_REMOVE_ROOT;
-        node->value = NULL;
-        free(node);
-        node = NULL;
-        return 0;
-    }
-    else
-        return TRY_REMOVE_NONLEAF;
-}
-
-int NodesVerify( Node* node )
-{    
-    int status = TREE_IS_OK;
-
-    if( node == NULL )
-    {
-        status |= NODE_PTR_IS_NULL; 
-        return status;
-    }
-
-    if ( node->left  != NULL ) 
-        status |= NodesVerify(node->left);
-    if (node->right != nullptr)
-        status |= NodesVerify(node->right);
-
-    return status;
-}
-
-int TreeVerify( Tree* tree )
-{
-    if ( tree == NULL )
-        return TREE_IS_NULL;
-
-    if ( tree->root == NULL )
-        return TREE_ROOT_IS_NULL;
-
-    int status = TREE_IS_OK;
-    if (tree->root->left  != NULL)
-        status |= NodesVerify(tree->root->left);
-
-    if (tree->root->right != NULL)
-        status |= NodesVerify(tree->root->right);
-
-    tree->errors = status;
-    return tree->errors;
-}
-
-int NodeDump( Node *node, size_t number_of_node, FILE *dump_file )
-{
-    if( node )
-    {
-        if ( node->left == NULL && node->right == NULL )
-            fprintf(dump_file, "    node%lu [fillcolor=\"%s\", ", number_of_node, leafcolor);
-        else
-            fprintf(dump_file, "    node%lu [fillcolor=\"%s\", ", number_of_node, nodecolor);
-        fprintf(dump_file, "label=\"");
-        
-        if (node->value == nullptr)
-        {
-            fprintf(dump_file, "empty");
-        }
-        else if (node->value->type == OPER_TYPE)
-        {
-            switch ( (char) node->value->arg )
-            {
-                case MUL:
-                    fprintf(dump_file, "%c", (char) node->value->arg);
-                    break;
-
-                case SUB:
-                    fprintf(dump_file, "%c", (char) node->value->arg);
-                    break;
-
-                case ADD:
-                    fprintf(dump_file, "%c", (char) node->value->arg);
-                    break;
-            
-                case DIV:
-                    fprintf(dump_file, "%c", (char) node->value->arg);
-                    break;
-
-                case POW:
-                    fprintf(dump_file, "%c", (char) node->value->arg);
-                    break;
-                
-                case EXP:
-                    fprintf(dump_file, "e");
-                    break;
-            
-                case PI:
-                   fprintf(dump_file, "pi");
-                    break;
-            
-                CASE(SH);
-                CASE(CH);
-                CASE(SIN);
-                CASE(COS);
-                CASE(LN);
-
-                default:
-                    fprintf(dump_file, "dead");
-                    break;
-            }
-        }
-        else if (node->value->type == NUM_TYPE)
-        {
-            fprintf(dump_file, "%lg", node->value->arg);
-        }
-        else if (node->value->type == VAR_TYPE)
-        {
-            fprintf(dump_file, "%c", (char) node->value->arg);
-        }
-        fprintf(dump_file, "\"");
-        fprintf(dump_file, "];\n");
-    
-        if (node->left)
-        {
-            fprintf(dump_file, "    edge [color=\"%s\"]; node%lu -> node%lu;\n", leftcolor, number_of_node, number_of_node * 2 + 1 );
-            NodeDump(node->left, number_of_node * 2 + 1, dump_file);
-        }
-        if (node->right)
-        {
-            fprintf(dump_file, "    edge [color=\"%s\"]; node%lu -> node%lu;\n", rightcolor, number_of_node, number_of_node * 2 + 2 );
-            NodeDump(node->right, number_of_node * 2 + 2, dump_file);
-        }
-    }
-}
-
-int TreeDump( Tree* tree, FILE* logger )
-{
-    assert( tree );
-
-    int status = TreeVerify( tree );
-
-    static size_t num_of_call = 1;
-
-	fprintf( logger, "=======================================\nTREE DUMP CALL #%zu\nSize of tree: %zu\n", num_of_call, tree->size );
-    if ( tree->errors )
-	{
-		fprintf( logger, "-------------ERRORS------------\n" );
-		if ( tree->errors & TREE_IS_NULL )
-		{
-			fprintf( logger, "TREE POINTER IS NULL\n" );
-			return 0;
-		}
-        if ( tree->errors & TREE_LOGER_ERROR ) fprintf( logger, "TREE LOGGER ERROR\n" );
-		if ( tree->errors & TREE_ROOT_IS_NULL ) fprintf( logger, "ROOT OF TREE POINTER IS NULL\n" );
-		if ( tree->errors & NODE_PTR_IS_NULL ) fprintf( logger, "TRY TO WORK WITH NULL NODE\n" );
-	    if ( tree->errors & TRY_REMOVE_ROOT ) fprintf( logger, "TRY TO REMOVE ROOT NODE\n");
-	    if ( tree->errors & TRY_REMOVE_NONLEAF ) fprintf( logger, "TRY TO REMOVE NON LEAF NODE \n" );
-        if ( tree->errors & ADD_NODE_ERROR ) fprintf( logger, "THIS LEAF IS ALREADY EXIST \n" );
-
-		fprintf( logger, "----------END_OF_ERRORS--------\n" );
-	}
-	else
-    {
-		fprintf( logger, "------------NO_ERRORS----------\n" );
-        size_t number_of_node = 0;
-        FILE* dump_file = fopen( "tree/dump.gv", "w" );
-    
-        fputs( "digraph structs {\n", dump_file );
-        fputs( "    node [color=black, shape=box, style=\"filled\"];\n", dump_file );
-
-        status = NodeDump( tree->root, number_of_node, dump_file );
-
-        fputs( "}\n", dump_file );
-
-        fclose( dump_file );
-    }
-	fprintf( logger, "=======================================\n\n" );
-	num_of_call++;
-
-    return status;
+    return 0;
 }

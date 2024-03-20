@@ -6,9 +6,9 @@
 #include <assert.h>
 #include <string.h>
 
-#define FUNCS_COUNT				 nametables->functions_nametable.size
-#define FUNCS_NAMETABLE			 nametables->functions_nametable
-#define CURRENT_LOCAL_NUM	     nametables->local_nametables_counter
+#define FUNCS_COUNT              nametables->functions_nametable.size
+#define FUNCS_NAMETABLE          nametables->functions_nametable
+#define CURRENT_LOCAL_NUM        nametables->local_nametables_counter
 #define CURRENT_LOCAL_NAMETABLE  nametables->local_nametables[FUNCS_COUNT - 1]
 
 const int MAX_NAME_SIZE      = 100;
@@ -16,32 +16,32 @@ const int MAX_NAMETABLE_SIZE = 200;
 
 enum NameTableElemType
 {
-	variable   = 1, 
+    variable   = 1, 
     function   = 2, 
     error_type = 0
 };
 
 struct NameTableElem
 {
-	NameTableElemType type;
-	char name[MAX_NAME_SIZE];
-	int expr;
+    NameTableElemType type;
+    char name[MAX_NAME_SIZE];
+    int expr;
     int num;
 };
 
 struct NameTable
 {
-	NameTableElem elems[MAX_NAMETABLE_SIZE];
-	int size;
+    NameTableElem elems[MAX_NAMETABLE_SIZE];
+    int size;
 };
 
 struct ProgramNameTables
 {
-	NameTable  functions_nametable;
-	NameTable* local_nametables;
-	//NameTable  common_nametable;
+    NameTable  functions_nametable;
+    NameTable* local_nametables;
+    //NameTable  common_nametable;
 
-	size_t local_nametables_counter;
+    size_t local_nametables_counter;
 };
 
 void NameTableCtor(NameTable* nametable);

@@ -10,7 +10,7 @@ NameTableElem* NameTableAdd(NameTable* nametable, char* name, NameTableElemType 
     strcpy(nametable->elems[nametable->size].name, name);
     nametable->elems[nametable->size].expr = default_expr;
     nametable->elems[nametable->size].type = type;
-    nametable->elems[nametable->size].num = num;
+    nametable->elems[nametable->size].num  = num;
     nametable->size++;
 
     if(nametable->size == MAX_NAMETABLE_SIZE)
@@ -37,24 +37,22 @@ NameTableElem* NameTableFind(NameTable* nametable, char* name)
 NameTableElem* NameTableAddWithExpr(NameTable* nametable, char* name, NameTableElemType type, int new_expr, int num)
 {
     NameTableElem* elem = NameTableAdd(nametable, name, type, num);
-    if(!elem)
+    if(elem)
     {
-        return NULL;
+        elem->expr = new_expr;
     }
 
-    elem->expr = new_expr;
     return elem;
 }
 
 NameTableElem* NameTableChangeExpr(NameTable* nametable, char* name, int new_expr)
 {
     NameTableElem* elem = NameTableFind(nametable, name);
-    if(!elem || elem->type != variable)
+    if(elem && elem->type == variable)
     {
-        return NULL;
+        elem->expr = new_expr;;
     }
 
-    elem->expr = new_expr;
     return elem;
 }
 
@@ -67,7 +65,7 @@ void WriteNameTable(NameTable* nametable, const char* nametable_header, FILE* ou
 	for (size_t i = 0; i < nametable->size; i++) 
 	{
 		fprintf(output_file, "    [\"%s\", %d]\n", 
-			nametable->elems[i].name, nametable->elems[i].num);
+			    nametable->elems[i].name, nametable->elems[i].num);
 	}
 
 	fprintf(output_file, "}\n\n");
@@ -82,6 +80,7 @@ void NameTableCtor(NameTable* nametable)
 void NameTableDtor(NameTable* nametable)
 {
 	assert(nametable != NULL);
+
     for(int i = 0; i < nametable->size; i++)
     {
         strcpy(nametable->elems[i].name, "Goddaaaaaaaam");
@@ -103,7 +102,9 @@ void ProgramNameTablesCtor(ProgramNameTables* nametables, size_t local_nametable
 	nametables->functions_nametable.size = 0;
 	
 	for(size_t i = 0; i < local_nametables_counter; i++)
+    {
 		nametables->local_nametables[i].size = 0;
+    }
 }
 
 void ProgramNameTablesDtor(ProgramNameTables* nametables)
@@ -143,13 +144,15 @@ NameTableElem* ProgramNameTablesAddFunc(ProgramNameTables* nametables, char* fun
 
 void WriteProgramNameTables(ProgramNameTables* nametables, FILE* input_file)
 {
-	assert(nametables != nullptr);
-	assert(input_file != nullptr);
+	assert(nametables != NULL);
+	assert(input_file != NULL);
 
 	fprintf(input_file, "Locals Count:%zu\n\n", CURRENT_LOCAL_NUM);
 
 	WriteNameTable(&nametables->functions_nametable, "FunctionsNameTable", input_file);
 
 	for(size_t i = 0; i < CURRENT_LOCAL_NUM; i++)
+    {
 		WriteNameTable(&nametables->local_nametables[i], "LocalNameTable", input_file);
+    }
 }

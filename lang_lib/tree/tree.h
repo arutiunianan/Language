@@ -7,77 +7,88 @@
 #include <string.h>
 #include <assert.h>
 
-const int DEAD_SIZE = -1;
+const int MAX_OPER_LEN = 50;
 
-const char ADD = '+';
-const char SUB = '-';
-const char MUL = '*';
-const char DIV = '/';
-const char POW = '^';
-const char EQ  = '=';
-const char EXP = 'e';
-const char SIN = 's';
-const char COS = 'c';
-const char PI  = 'p';
-const char LN  = 'l';
-const char SH  = 'w';
-const char CH  = 'h';
-typedef enum valueType
+enum Operation
 {
-    VAR_TYPE = 1,
-    NUM_TYPE = 2,
-    OPER_TYPE = 3,
-}valueType;
+    #define OPER_DEF(code, ...) code,
+    
+    #include "../oper_defs.h"
 
-typedef struct value
+    #undef OPER_DEF
+
+    OPER_COUNT,
+    WRONG_OPER
+};
+
+#define EMPTY_NODE "." 
+
+enum TreeElemType
+{ 
+    NUM, 
+    OPER, 
+    ID
+};
+
+struct TreeNodeElem
 {
-    int type;
-    double arg;
-}value;
-//const value DEAD_VALUE = {2003, '*', 24, (char )'A', 10};
-typedef value *value_t;
+    double num;
+    Operation oper;
+    NameTableElem* id;
+};
 
-typedef enum Errors
+struct TreeNode_t
 {
-    TREE_IS_OK = 0,
-    TREE_IS_NULL = 1 << 0,
-    TREE_LOGER_ERROR = 1 << 1,
-    TREE_ROOT_IS_NULL = 1 << 2,
-    NODE_PTR_IS_NULL = 1 << 3,
-    TRY_REMOVE_ROOT = 1 << 4,
-    TRY_REMOVE_NONLEAF = 1 << 5,
-    ADD_NODE_ERROR = 1 << 6,
-}Errors;
+    TreeNodeElem elem;
+    TreeElemType type;
+};
 
-typedef struct Node
+struct TreeNode
 {
-    value_t value;
+    TreeNode_t node_elem;
 
-    Node* parent;
-    Node* left;
-    Node* right;
-}Node;
+    TreeNode* left;
+    TreeNode* right;
+};
 
-typedef struct Tree
+struct Tree;
+
+TreeNode* OpNew(TreeNode_t* data);
+void OpDelete(TreeNode* node);
+
+void PrintNodePreOrder (Tree* tree, const TreeNode* node, FILE* logger);
+void PrintNodePostOrder(Tree* tree, const TreeNode* node, FILE* logger);
+void PrintNodeInOrder  (Tree* tree, const TreeNode* node, FILE* logger);
+
+void WriteNodePreOrder(Tree* tree, const TreeNode* node, FILE* logger, int rec_depth);
+
+TreeNode* CopyNode(Tree* tree, TreeNode* node);
+TreeNode* CreateNode(Tree* tree, TreeNode_t* data, TreeNode** node, TreeNode* left_node, TreeNode* right_node);
+void DestroyNode(Tree* tree, TreeNode* node);
+
+
+
+enum TreeError
 {
-    FILE* log;
-    Node* root;
-    int size;
-    int errors;
-}Tree;
+    TREE_PTR_NULL     = 1 << 0,
+    ROOT_PTR_NULL     = 1 << 1,
+    NODE_CALLOC_ERROR = 1 << 2,
+    TREE_DELETED      = 1 << 3
+};
 
-typedef enum WhichChild
+struct Tree
 {
-    Right = 1,
-    Left = 0,
-}WhichChild;
+    TreeNode* root;
 
-void TreeCtor( Tree* tree );
-void TreeDtor( Tree* tree );
-int NodeDtor( Node* node );
-Node* CopyNode( Node* data );
-int InviteNode( Tree* tree, Node* node, WhichChild child, value_t value );
-int RemoveNode( Tree* tree, Node* node );
-int TreeDump( Tree* tree, FILE* logger );
+    char* (*ElemPrinter) (const TreeNode_t*);
+
+    unsigned errors;
+};
+
+void TreeCtor(Tree* tree, char* (*ElemPrinter) (const TreeNode_t*));
+int TreeDtor(Tree* tree);
+
+unsigned TreeVerifier(Tree* tree);
+void TreeGraphPrint(Tree* tree, const char* file_name);
 
 #endif // #define TREE_H_
