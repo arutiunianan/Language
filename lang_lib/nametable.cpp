@@ -2,14 +2,13 @@
 
 const int default_expr = 0;
 
-NameTableElem* NameTableAdd(NameTable* nametable, char* name, NameTableElemType type, int num)
+NameTableElem* NameTableAdd(NameTable* nametable, char* name, int num)
 {
     assert(nametable != NULL);
     assert(name      != NULL);
 
     strcpy(nametable->elems[nametable->size].name, name);
     nametable->elems[nametable->size].expr = default_expr;
-    nametable->elems[nametable->size].type = type;
     nametable->elems[nametable->size].num  = num;
     nametable->size++;
 
@@ -33,10 +32,10 @@ NameTableElem* NameTableFind(NameTable* nametable, char* name)
 
 	return NULL;
 }
-
+/*
 NameTableElem* NameTableAddWithExpr(NameTable* nametable, char* name, NameTableElemType type, int new_expr, int num)
 {
-    NameTableElem* elem = NameTableAdd(nametable, name, type, num);
+    NameTableElem* elem = NameTableAdd(nametable, name, num);
     if(elem)
     {
         elem->expr = new_expr;
@@ -55,7 +54,7 @@ NameTableElem* NameTableChangeExpr(NameTable* nametable, char* name, int new_exp
 
     return elem;
 }
-
+*/
 void WriteNameTable(NameTable* nametable, const char* nametable_header, FILE* output_file)
 {
 	assert(nametable != nullptr);
@@ -122,7 +121,8 @@ NameTableElem* ProgramNameTablesAddVar(ProgramNameTables* nametables, char* var_
 	NameTableElem* var_id = NameTableFind(&CURRENT_LOCAL_NAMETABLE, var_name);
 	if(!var_id)
     {
-		var_id = NameTableAdd(&CURRENT_LOCAL_NAMETABLE, var_name, variable, CURRENT_LOCAL_NAMETABLE.size); 
+		var_id = NameTableAdd(&CURRENT_LOCAL_NAMETABLE, var_name, CURRENT_LOCAL_NAMETABLE.size); 
+        var_id->type = variable;
     }
 	
 	return var_id;
@@ -136,7 +136,8 @@ NameTableElem* ProgramNameTablesAddFunc(ProgramNameTables* nametables, char* fun
     NameTableElem* func_id = NameTableFind(&FUNCS_NAMETABLE, func_name);
 	if(!func_id)
 	{
-		func_id = NameTableAdd(&nametables->functions_nametable, func_name, function, FUNCS_COUNT);
+		func_id = NameTableAdd(&nametables->functions_nametable, func_name, FUNCS_COUNT);
+        func_id->type = function;
 	}
 	
 	return func_id;

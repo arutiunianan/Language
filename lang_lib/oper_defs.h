@@ -5,6 +5,8 @@ OPER_DEF(DIV, "/", "/")
 OPER_DEF(ADD, "+", "+")
 				
 OPER_DEF(SUB, "-", "-")
+
+OPER_DEF(POW, "^", "^")
 					
 OPER_DEF(LG, "mets", "մեծ")
 					
@@ -37,3 +39,5 @@ OPER_DEF(OBR, "ach", "աջ")
 OPER_DEF(CBR, "dzakh", "ձախ")
 					
 OPER_DEF(RETURN, "Veradarcnel", "Վերադարձնել")
+
+OPER_DEF(TAB, "    ", "    ")

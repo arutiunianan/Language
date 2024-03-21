@@ -12,7 +12,9 @@
 #define CURRENT_LOCAL_NAMETABLE  nametables->local_nametables[FUNCS_COUNT - 1]
 
 const int MAX_NAME_SIZE      = 100;
-const int MAX_NAMETABLE_SIZE = 200;
+const int MAX_NAMETABLE_SIZE = 100;
+const int MAX_ID_SIZE        = 200;
+
 
 enum NameTableElemType
 {
@@ -39,7 +41,7 @@ struct ProgramNameTables
 {
     NameTable  functions_nametable;
     NameTable* local_nametables;
-    //NameTable  common_nametable;
+    NameTable  common_nametable;
 
     size_t local_nametables_counter;
 };
@@ -47,10 +49,10 @@ struct ProgramNameTables
 void NameTableCtor(NameTable* nametable);
 void NameTableDtor(NameTable* nametable);
 
-NameTableElem* NameTableAdd(NameTable* nametable, char* name, NameTableElemType type, int num);
+NameTableElem* NameTableAdd(NameTable* nametable, char* nam, int num);
 NameTableElem* NameTableFind(NameTable* nametable, char* name);
-NameTableElem* NameTableAddWithExpr(NameTable* nametable, char* name, NameTableElemType type, int new_expr, int num);
-NameTableElem* NameTableChangeExpr(NameTable* nametable, char* name, int new_expr);
+//NameTableElem* NameTableAddWithExpr(NameTable* nametable, char* name, NameTableElemType type, int new_expr, int num);
+//NameTableElem* NameTableChangeExpr(NameTable* nametable, char* name, int new_expr);
 void WriteNameTable(NameTable* nametable, const char* nametable_header, FILE* output_file);
 
 void ProgramNameTablesCtor(ProgramNameTables* nametables, size_t local_nametables_counter);

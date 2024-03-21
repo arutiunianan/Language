@@ -6,6 +6,7 @@
 #include <stddef.h>
 #include <string.h>
 #include <assert.h>
+#include "../nametable.h"
 
 const int MAX_OPER_LEN = 50;
 
@@ -27,7 +28,8 @@ enum TreeElemType
 { 
     NUM, 
     OPER, 
-    ID
+    ID,
+    ERROR_TYPE
 };
 
 struct TreeNodeElem

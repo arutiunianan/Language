@@ -1,8 +1,7 @@
 #ifndef SYN_TREE_H_
 #define SYN_TREE_H_
 
-#include "tree.h"
-#include "nametable.h"
+#include "../../frontend/lex_anal.h"
 
 char* SYNTreeElemPrinter(const TreeNode_t* elem_to_print);
 void SYNTreeElemCtor(TreeNode_t* new_elem, TreeNode_t* new_data);

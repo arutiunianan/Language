@@ -44,7 +44,10 @@ void OpDelete(TreeNode* node)
 {
     assert(node != NULL);
 
-    node->node_elem = {};
+    node->node_elem.elem.id   = NULL;
+    node->node_elem.elem.num  = 0xB1BA;
+    node->node_elem.elem.oper = WRONG_OPER;
+    node->node_elem.type      = ERROR_TYPE;
     free(node->left);
     free(node->right);
 }
@@ -115,7 +118,7 @@ TreeNode* CopyNode(Tree* tree, TreeNode* node)
         return NULL;
     }
 
-    TreeNode* new_node = {};
+    TreeNode* new_node = NULL;
     new_node = OpNew(&node->node_elem);
     
     new_node->left  = CopyNode(tree, node->left);

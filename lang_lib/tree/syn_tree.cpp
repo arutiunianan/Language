@@ -1,33 +1,27 @@
 #include "syn_tree.h"
 
 int REC_INDENT_SIZE = 2;
-void WriteNodePreOrder(Tree* tree, const TreeNode* node, FILE* ast_file, int rec_depth)
+void WriteNodePreOrder(Tree* tree, const TreeNode* node, FILE* syn_file, int rec_depth)
 {
 	assert(tree     != NULL);
-	assert(ast_file != NULL);
+	assert(syn_file != NULL);
 
 	if(!node) 
     { 
-        fprintf(ast_file, "%*s" EMPTY_NODE "\n", rec_depth * REC_INDENT_SIZE, ""); 
+        fprintf(syn_file, "%*s" EMPTY_NODE "\n", rec_depth * REC_INDENT_SIZE, ""); 
         return; 
     }
 
-	fprintf(ast_file, "%*s(", rec_depth * REC_INDENT_SIZE, "");
+	fprintf(syn_file, "%*s(", rec_depth * REC_INDENT_SIZE, "");
 
-	fprintf(ast_file, "%s\n", tree->ElemPrinter(&node->node_elem));
-	WriteNodePreOrder(tree, node->left,  ast_file, rec_depth + 1);
-	WriteNodePreOrder(tree, node->right, ast_file, rec_depth + 1);
+	fprintf(syn_file, "%s\n", tree->ElemPrinter(&node->node_elem));
+	WriteNodePreOrder(tree, node->left,  syn_file, rec_depth + 1);
+	WriteNodePreOrder(tree, node->right, syn_file, rec_depth + 1);
 	
-	fprintf(ast_file, "%*s)\n", rec_depth * REC_INDENT_SIZE, "");
+	fprintf(syn_file, "%*s)\n", rec_depth * REC_INDENT_SIZE, "");
 }
 
-const double EPSILON = 10e-15;
-bool IsDoubleInt(double num)
-{
-	return num - (int)num < EPSILON;
-}
-
-void WriteASTTree(Tree* tree, FILE* logger)
+void WriteSYNTree(Tree* tree, FILE* logger)
 {
 	assert(tree   != nullptr);
 	assert(logger != nullptr);
@@ -37,17 +31,10 @@ void WriteASTTree(Tree* tree, FILE* logger)
 	fprintf(logger, "}");
 }
 
-char* GetOperDesignation(Operation oper)
+const double EPSILON = 10e-15;
+bool IsDoubleInt(double num)
 {
-    switch(oper)
-    {
-        #define OPER_DEF(value, designation1, designation2)     \
-        case value:                                              \
-            return designation2;
-
-        #include "../oper_defs.h"
-        #undef OPER_DEF
-    }
+	return num - (int)num < EPSILON;
 }
 
 char* SYNTreeElemPrinter(const TreeNode_t* elem_to_print)
