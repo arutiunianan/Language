@@ -4,7 +4,7 @@
 #include "../lang_lib/str_lib/io.h"
 #include "../lang_lib/tree/tree.h"
 
-TreeNode** DoLexicalAnalisys(Tree* expr_tree, const char* file_name, NameTable* common_nametable, size_t* functions_counter);
+TreeNode** DoLexicalAnalisys(Tree* expr_tree, const char* file_name, NameTable* common_nametable, int* functions_counter);
 
 char* GetOperDesignation(Operation oper);
 Operation GetOperValue(const char* design);

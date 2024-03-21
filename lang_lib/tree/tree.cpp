@@ -18,7 +18,7 @@ do                                                                   \
 #define ERROR_PROCESSING(structure, StructVerifier, StructDump, StructDtor)  \
 do                                                                            \
 {                                                                              \
-    if(StructVerifier(structure))                                              \
+    if(StructVerifier(structure))                                               \
     {                                                                            \
         StructDump(structure, stderr);                                            \
         StructDtor(structure);                                                     \
@@ -230,9 +230,9 @@ void TreeGraphPrint(Tree* tree, const char* file_name)
     assert(tree      != NULL);
     assert(file_name != NULL);
 
-    const size_t MAX_FILE_NAME_SIZE       = 50;
-    const size_t MAX_CONSOLE_COMMAND_SIZE = 100;
-    static size_t graph_num               = 1;
+    const int MAX_FILE_NAME_SIZE       = 50;
+    const int MAX_CONSOLE_COMMAND_SIZE = 100;
+    static int graph_num               = 1;
 
     char graph_file_name[MAX_FILE_NAME_SIZE] = "";
 

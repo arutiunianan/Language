@@ -43,7 +43,7 @@ struct ProgramNameTables
     NameTable* local_nametables;
     NameTable  common_nametable;
 
-    size_t local_nametables_counter;
+    int local_nametables_counter;
 };
 
 void NameTableCtor(NameTable* nametable);
@@ -55,7 +55,7 @@ NameTableElem* NameTableFind(NameTable* nametable, char* name);
 //NameTableElem* NameTableChangeExpr(NameTable* nametable, char* name, int new_expr);
 void WriteNameTable(NameTable* nametable, const char* nametable_header, FILE* output_file);
 
-void ProgramNameTablesCtor(ProgramNameTables* nametables, size_t local_nametables_counter);
+void ProgramNameTablesCtor(ProgramNameTables* nametables, int local_nametables_counter);
 void ProgramNameTablesDtor(ProgramNameTables* nametables);
 
 NameTableElem* ProgramNameTablesAddVar(ProgramNameTables* nametables, char* var_name);

@@ -14,7 +14,7 @@ OPER_DEF(LL, "pokr", "փոքր")
 					
 OPER_DEF(LE, "havasar", "հավասար")
 
-OPER_DEF(LNE, "havasar che","հավասար չէ")
+OPER_DEF(LNE, "havasarche","հավասարչէ")
 
 OPER_DEF(AND, "ev", "և")
 
@@ -34,9 +34,9 @@ OPER_DEF(FUNC, "Gortsaruyt", "Գործառույթ")
 					
 OPER_DEF(FUNC_SEP, "avelin", "ավելին")
 					
-OPER_DEF(OBR, "ach", "աջ")
+OPER_DEF(OBR, "tstsi", "ծծի")
 					
-OPER_DEF(CBR, "dzakh", "ձախ")
+OPER_DEF(CBR, "pupul", "պուպուլ")
 					
 OPER_DEF(RETURN, "Veradarcnel", "Վերադարձնել")
 

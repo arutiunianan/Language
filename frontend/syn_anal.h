@@ -4,6 +4,6 @@
 #include "../lang_lib/tree/syn_tree.h"
 
 Tree GetCodeTree(const char* file_name, ProgramNameTables* nametables);
-void PrintCurrentToken(TreeNode** tokens, size_t* current_token_num);
+void PrintCurrentToken(TreeNode** tokens, int* current_token_num);
 
 #endif // SYN_ANAL_H
