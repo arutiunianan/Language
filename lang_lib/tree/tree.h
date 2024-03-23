@@ -84,13 +84,13 @@ struct Tree
 
     char* (*ElemPrinter) (const TreeNode_t*);
 
-    unsigned errors;
+    int errors;
 };
 
 void TreeCtor(Tree* tree, char* (*ElemPrinter) (const TreeNode_t*));
 int TreeDtor(Tree* tree);
 
-unsigned TreeVerifier(Tree* tree);
+int TreeVerifier(Tree* tree);
 void TreeGraphPrint(Tree* tree, const char* file_name);
 
 #endif // #define TREE_H_

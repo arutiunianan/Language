@@ -1,0 +1,43 @@
+CALL пупупу
+HLT
+
+бубу:
+    PUSH 1.000000
+    PUSH [0]
+    JE cond_1
+    PUSH 0
+    JMP end_cond2
+    cond_1:
+    PUSH 1
+    end_cond2:
+    PUSH 0
+    JE end_if_3
+    PUSH 1.000000
+    POP RAX
+    RET
+    end_if_3:
+    PUSH [0]
+    PUSH [0]
+    PUSH 1.000000
+    SUB
+    POP [1]
+    PUSH [1]
+    CALL Factorial
+    PUSH RAX
+    MUL
+    POP [3]
+    PUSH [3]
+    POP RAX
+    RET
+
+пупупу:
+    PUSH 0.000000
+    POP [0]
+    IN
+    POP [0]
+    CALL бубу
+    PUSH RAX
+    OUT
+    PUSH 0.000000
+    POP RAX
+    RET

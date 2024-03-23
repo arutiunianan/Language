@@ -51,8 +51,7 @@ void NameTableDtor(NameTable* nametable);
 
 NameTableElem* NameTableAdd(NameTable* nametable, char* nam, int num);
 NameTableElem* NameTableFind(NameTable* nametable, char* name);
-//NameTableElem* NameTableAddWithExpr(NameTable* nametable, char* name, NameTableElemType type, int new_expr, int num);
-//NameTableElem* NameTableChangeExpr(NameTable* nametable, char* name, int new_expr);
+NameTableElem* NameTableFind(NameTable* nametable, const char* elem_to_find, int* elem_num);
 void WriteNameTable(NameTable* nametable, const char* nametable_header, FILE* output_file);
 
 void ProgramNameTablesCtor(ProgramNameTables* nametables, int local_nametables_counter);
@@ -61,5 +60,6 @@ void ProgramNameTablesDtor(ProgramNameTables* nametables);
 NameTableElem* ProgramNameTablesAddVar(ProgramNameTables* nametables, char* var_name);
 NameTableElem* ProgramNameTablesAddFunc(ProgramNameTables* nametables, char* func_name);
 void WriteProgramNameTables(ProgramNameTables* nametables, FILE* input_file);
+void ReadProgramNameTables(ProgramNameTables* nametables, FILE* ast_file, int* errors);
 
 #endif // NT_H

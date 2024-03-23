@@ -261,7 +261,7 @@ void TreeGraphPrint(Tree* tree, const char* file_name)
     graph_num++;
 }
 
-unsigned TreeVerifier(Tree* tree)
+int TreeVerifier(Tree* tree)
 {
     if(!tree)
     {

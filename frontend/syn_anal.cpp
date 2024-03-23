@@ -215,7 +215,7 @@ TreeNode* GetLogic(TreeNode** tokens, int* current_token_num, ProgramNameTables*
     TreeNode* expr_node1 = GET_EXPR();
     
     while(TOKEN_OPER == LG || TOKEN_OPER == LE || TOKEN_OPER == LNE || 
-		  TOKEN_OPER == LL || TOKEN_OPER == AND || TOKEN_OPER == OR)
+          TOKEN_OPER == LL || TOKEN_OPER == AND || TOKEN_OPER == OR)
     {
         int oper_token_num = *current_token_num;
 
@@ -675,6 +675,7 @@ TreeNode* GetFunctionDefinition(TreeNode** tokens, int* current_token_num, Progr
     return tokens[func_token_num];
 }
 
+
 TreeNode* GetProgram(TreeNode** tokens, int* current_token_num, ProgramNameTables* nametables)
 {
     assert(tokens            != NULL);
@@ -702,16 +703,6 @@ TreeNode* GetProgram(TreeNode** tokens, int* current_token_num, ProgramNameTable
 
     return func_node1;
 }
-
-
-
-
-
-
-
-
-
-
 
 
 Tree GetCodeTree(const char* file_name, ProgramNameTables* nametables)

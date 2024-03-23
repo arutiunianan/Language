@@ -32,29 +32,21 @@ NameTableElem* NameTableFind(NameTable* nametable, char* name)
 
     return NULL;
 }
-/*
-NameTableElem* NameTableAddWithExpr(NameTable* nametable, char* name, NameTableElemType type, int new_expr, int num)
-{
-    NameTableElem* elem = NameTableAdd(nametable, name, num);
-    if(elem)
-    {
-        elem->expr = new_expr;
-    }
 
-    return elem;
+NameTableElem* NameTableFind(NameTable* nametable, const char* elem_to_find, int* elem_num)
+{
+	for(size_t i = 0; i < nametable->size; i++)
+	{
+		if(strcmp(nametable->elems[i].name, elem_to_find) == 0)
+		{
+			*elem_num = i;
+			return &nametable->elems[i];
+		}
+	}
+
+	return NULL;
 }
 
-NameTableElem* NameTableChangeExpr(NameTable* nametable, char* name, int new_expr)
-{
-    NameTableElem* elem = NameTableFind(nametable, name);
-    if(elem && elem->type == variable)
-    {
-        elem->expr = new_expr;;
-    }
-
-    return elem;
-}
-*/
 void WriteNameTable(NameTable* nametable, const char* nametable_header, FILE* output_file)
 {
     assert(nametable != NULL);
@@ -155,5 +147,65 @@ void WriteProgramNameTables(ProgramNameTables* nametables, FILE* input_file)
     for(int i = 0; i < CURRENT_LOCAL_NUM; i++)
     {
         WriteNameTable(&nametables->local_nametables[i], "LocalNameTable", input_file);
+    }
+}
+
+
+#define CHECK_VALID_ARGS_NUM(_fscanf)      \
+	{                                       \
+		valid_args_num = _fscanf;            \
+		if(!(valid_args_num))                 \
+		{                                      \
+			*errors |= 1;                       \
+			return;                              \
+		}                                         \
+	}
+
+void ReadNameTable(NameTable* nametable, FILE* ast_file, const char* needed_nametable_header, int* errors)
+{
+	assert(nametable != NULL);
+	assert(ast_file  != NULL);
+
+	size_t valid_args_num = 0;
+	int cmd_len           = 0;
+	
+	char nametable_header[MAX_NAME_SIZE] = "";
+	CHECK_VALID_ARGS_NUM(fscanf(ast_file, " %s [ %zu ] {", nametable_header, &nametable->size));
+
+	if(strcmp(needed_nametable_header, nametable_header) != 0)
+    {
+		*errors |= 1;
+    }
+
+	for(size_t i = 0; i < nametable->size; i++)
+	{
+		CHECK_VALID_ARGS_NUM(fscanf(ast_file, " [ \" %[^\"] \" , %d]", 
+		nametable->elems[i].name, &nametable->elems[i].num));
+	}
+
+	(void)fscanf(ast_file, " }%n", &cmd_len);
+
+	if(!cmd_len)
+    {
+		*errors |= 1;
+    }
+}
+
+#undef CHECK_VALID_ARGS_NUM
+
+void ReadProgramNameTables(ProgramNameTables* nametables, FILE* ast_file, int* errors)
+{
+	assert(nametables != NULL);
+	assert(ast_file   != NULL);
+	assert(errors     != NULL);
+
+	assert(fscanf(ast_file, "Locals Count: %zu", &nametables->local_nametables_counter) == 1);
+	ProgramNameTablesCtor(nametables, nametables->local_nametables_counter);
+
+	ReadNameTable(&nametables->functions_nametable, ast_file, "FunctionsNameTable", errors);
+
+	for(size_t i = 0; i < nametables->local_nametables_counter; i++)
+    {
+		ReadNameTable(&nametables->local_nametables[i], ast_file, "LocalNameTable", errors);
     }
 }
