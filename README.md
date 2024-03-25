@@ -57,7 +57,7 @@
 <image src="for_readme/tree1.png" width=200px>
 
 #### Арифметические операции
-<image src="for_readme/tree2.png" width=550px>
+<image src="for_readme/tree2.png" width=650px>
 
 #### Операции сравнения
 <image src="for_readme/tree3.png" width=550px>
