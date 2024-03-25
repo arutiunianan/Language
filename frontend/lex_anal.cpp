@@ -11,8 +11,8 @@ int TrySetNum(Tree* expr_tree, TreeNode** token_ptr, char* code)
     assert(code      != NULL);
 
     int curr_ch_num                  = 0;
-    double num                          = 0;
-    int int_part_of_num                 = 1;
+    double num                       = 0;
+    int int_part_of_num              = 1;
     int fraction_part_digits_counter = 10;
 
     while(isdigit(code[curr_ch_num]) || code[curr_ch_num] == '.')
@@ -106,8 +106,8 @@ int TrySetId(Tree* expr_tree, TreeNode** token_ptr, const char* code, NameTable*
     assert(common_nametable != NULL);
     assert(locals_counter   != NULL);
 
-    char id_str[MAX_ID_SIZE]   = "";
-    int curr_ch_num         = 0;
+    char id_str[MAX_ID_SIZE] = "";
+    int curr_ch_num          = 0;
 
     curr_ch_num += SetIdStr(code + curr_ch_num, id_str);
 
